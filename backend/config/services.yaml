@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+parameters:
+    # Base delay of the exponential backoff between platform API retries.
+    app.platform_api.retry_delay_ms: 500
+    # Bitrix24 allows ~2 requests per second per portal; base delay of the retry backoff.
+    app.bitrix.min_interval_ms: 500
+    app.bitrix.retry_delay_ms: 1000
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+            - '../src/Entity/'
+            - '../src/DTO/'
+            - '../src/Enum/'
+            # Value objects built per request, not services.
+            - '../src/Service/Metric/Values/MetricDataSet.php'
+            - '../src/Service/Metric/Values/MetricValueResolver.php'
+            - '../src/Service/Period/WeekSegment.php'
+            - '../src/Service/Metric/RecalculationResult.php'
+            - '../src/Service/Action/ActionSlot.php'
+            - '../src/Service/Import/RnpSheet/Model/'
+
+    # The Bitrix webhook URL carries its access token, and the framework http_client logs every
+    # request URL (INFO). Bitrix gets a plain client with no logger attached.
+    app.bitrix_http_client:
+        class: Symfony\Contracts\HttpClient\HttpClientInterface
+        factory: ['Symfony\Component\HttpClient\HttpClient', 'create']
+
+    App\Integration\Bitrix\BitrixClient:
+        arguments:
+            $httpClient: '@app.bitrix_http_client'
+
+    # Claude through the Anthropic SDK; tests and the e2e stand use a scripted fake instead.
+    App\Service\Ai\Llm\LlmClient: '@App\Service\Ai\Llm\ClaudeLlmClient'
+
+when@test:
+    parameters:
+        app.platform_api.retry_delay_ms: 0
+        app.bitrix.min_interval_ms: 0
+        app.bitrix.retry_delay_ms: 0
+
+    services:
+        # Tests script the platform API through this mock (see tests/Support/Platform/FakePlatformApi.php).
+        test.platform_http_client:
+            class: Symfony\Component\HttpClient\MockHttpClient
+            public: true
+
+        App\Integration\Platform\PlatformApiClient:
+            autowire: true
+            arguments:
+                $httpClient: '@test.platform_http_client'
+
+        # Tests script Bitrix24 through this mock (see tests/Support/Bitrix/FakeBitrixApi.php).
+        test.bitrix_http_client:
+            class: Symfony\Component\HttpClient\MockHttpClient
+            public: true
+
+        App\Integration\Bitrix\BitrixClient:
+            autowire: true
+            arguments:
+                $httpClient: '@test.bitrix_http_client'
+
+        # No test ever calls the real model (see tests/Support/Ai/FakeLlmClient.php).
+        App\Tests\Support\Ai\FakeLlmClient:
+            public: true
+
+        App\Service\Ai\Llm\LlmClient: '@App\Tests\Support\Ai\FakeLlmClient'

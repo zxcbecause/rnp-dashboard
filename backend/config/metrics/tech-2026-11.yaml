@@ -1,0 +1,41 @@
+# Tech («IT» section of «Метрики РНП», sheet «Ноябрь», kept by Takhmina), 10.11.2026.
+# Loaded with `php bin/console app:metric:catalog config/metrics/tech-2026-11.yaml` (idempotent: by code).
+# Projects: the sheet logs the progress made each day (2 % + 2 % + 4 % ...), the week is their sum and the month plan
+# is 100 % — so a project metric is a percent summed over time, not an average (an increment, not a ratio).
+
+units:
+  Tech:
+    sort_from: 700
+    metrics:
+      - code: tech_timeline
+        name: Таймлайн проектов (ЦКП — сданные в срок)
+        unit: percent
+        card: ['Общий прогресс по всем проектам отдела: какая часть работ сдана в срок', 'Σ прироста прогресса за дни периода, % (месячный план — 100 %)', 'Вручную (Регина)', 'Неделя, месяц = сумма недель']
+      - code: tech_tourist_cabinet
+        name: 'Проект: платформа, кабинет туриста'
+        unit: percent
+        card: ['Прогресс проекта «Кабинет туриста» на платформе', 'Σ прироста прогресса за дни периода, %', 'Вручную (Регина)', 'Неделя, месяц = сумма недель']
+      - code: tech_metrics_dashboard
+        name: 'Проект: дашборд метрик'
+        unit: percent
+        card: ['Прогресс проекта «Дашборд метрик» (РНП-дашборд)', 'Σ прироста прогресса за дни периода, %', 'Вручную (Регина)', 'Неделя, месяц = сумма недель']
+      - code: tech_aihub_stage2
+        name: 'Проект: ИИ-хаб, 2-й этап'
+        unit: percent
+        card: ['Прогресс второго этапа проекта «ИИ-хаб»', 'Σ прироста прогресса за дни периода, %', 'Вручную (Регина)', 'Неделя, месяц = сумма недель']
+      - code: tech_design_center
+        name: 'Проект: единый дизайн-центр'
+        unit: percent
+        card: ['Прогресс проекта «Единый дизайн-центр» (графический дизайн)', 'Σ прироста прогресса за дни периода, %', 'Вручную (Регина)', 'Неделя, месяц = сумма недель']
+      - code: tech_simplesales
+        name: 'Проект: SimpleSales'
+        unit: percent
+        card: ['Прогресс проекта SimpleSales', 'Σ прироста прогресса за дни периода, %', 'Вручную (Регина)', 'Неделя, месяц = сумма недель']
+      - code: tech_bugs_own
+        name: Баги в наших продуктах
+        direction: lower_better
+        card: ['Найденные баги в собственных продуктах', 'Σ багов за период', 'Вручную (Регина)', 'Неделя, месяц = сумма недель']
+      - code: tech_bugs_external
+        name: Баги в сторонних продуктах
+        direction: lower_better
+        card: ['Найденные баги в сторонних продуктах, которыми пользуется компания', 'Σ багов за период', 'Вручную (Регина)', 'Неделя, месяц = сумма недель']

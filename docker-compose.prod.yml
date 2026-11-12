@@ -1,0 +1,196 @@
+# Production stack of the RNP dashboard: one server, Docker Compose. Full guide: docs/deploy.md.
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#
+# What runs:
+#   mariadb   - database (volume rnp-prod-db), nightly dump into ${RNP_BACKUP_DIR}
+#   migrate   - one-shot: JWT keys (first start), migrations; php starts only after it succeeded
+#   php       - Symfony API (php-fpm), code baked into the image
+#   nginx     - in front of php-fpm, internal only
+#   frontend  - Nuxt production server; the only published port (127.0.0.1:${RNP_PORT}) - put HTTPS in front
+#   scheduler - Ofelia: platform/Bitrix syncs every 30 minutes, nightly full passes, nightly backup
+#   caddy     - optional (profile "caddy"): HTTPS with Let's Encrypt for ${RNP_DOMAIN} when the server has no proxy
+#
+# Secrets live only in .env.prod on the server (template: .env.prod.example, generator: docker/prod/init-env.sh).
+# Container names differ from the local stack (rnp-*), so both can run on one machine.
+
+name: rnp-prod
+
+x-backend-env: &backend-env
+  APP_ENV: prod
+  APP_DEBUG: "0"
+  APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env.prod}
+  JWT_PASSPHRASE: ${JWT_PASSPHRASE:?set JWT_PASSPHRASE in .env.prod}
+  DATABASE_URL: mysql://${MARIADB_USER:-rnp}:${MARIADB_PASSWORD:?set MARIADB_PASSWORD in .env.prod}@mariadb:3306/${MARIADB_DATABASE:-rnp}?serverVersion=11.4.0-MariaDB&charset=utf8mb4
+  DEFAULT_URI: https://${RNP_DOMAIN:-localhost}
+  # Requests come through the frontend's Nitro proxy (a private Docker address): trust its X-Forwarded-For,
+  # so login throttling counts real client addresses instead of one shared proxy address.
+  SYMFONY_TRUSTED_PROXIES: private_ranges
+  SYMFONY_TRUSTED_HEADERS: x-forwarded-for
+  PLATFORM_API_URL: ${PLATFORM_API_URL:-}
+  PLATFORM_API_USERNAME: ${PLATFORM_API_USERNAME:-}
+  PLATFORM_API_PASSWORD: ${PLATFORM_API_PASSWORD:-}
+  BITRIX_WEBHOOK_URL: ${BITRIX_WEBHOOK_URL:-}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  mariadb:
+    container_name: rnp-prod-mariadb
+    image: mariadb:11.4
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?set MARIADB_ROOT_PASSWORD in .env.prod}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-rnp}
+      MARIADB_USER: ${MARIADB_USER:-rnp}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      RNP_BACKUP_DAYS: ${RNP_BACKUP_DAYS:-14}
+      TZ: UTC
+    volumes:
+      - rnp-prod-db:/var/lib/mysql
+      - ${RNP_BACKUP_DIR:-./backups}:/backups
+      - ./docker/prod/backup.sh:/usr/local/bin/rnp-backup.sh:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+    logging: *logging
+    networks: [rnp-prod-net]
+
+  migrate:
+    container_name: rnp-prod-migrate
+    image: rnp-backend:${RNP_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: docker/prod/backend.Dockerfile
+      target: app
+    environment: *backend-env
+    # Fail fast: any failing step stops the stack before php serves an old schema.
+    command: >
+      sh -c "php bin/console lexik:jwt:generate-keypair --skip-if-exists --no-interaction &&
+             php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration &&
+             php bin/console doctrine:migrations:up-to-date --fail-on-unregistered &&
+             echo 'Migrations done.'"
+    volumes:
+      - rnp-prod-jwt:/var/www/backend/config/jwt
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: "no"
+    logging: *logging
+    networks: [rnp-prod-net]
+
+  php:
+    container_name: rnp-prod-php
+    image: rnp-backend:${RNP_IMAGE_TAG:-latest}
+    # Same build as migrate (shared cache): an image without a build section would be pulled from a registry.
+    build:
+      context: .
+      dockerfile: docker/prod/backend.Dockerfile
+      target: app
+    environment: *backend-env
+    volumes:
+      - rnp-prod-jwt:/var/www/backend/config/jwt:ro
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "php", "-v"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    logging: *logging
+    networks: [rnp-prod-net]
+
+  nginx:
+    container_name: rnp-prod-nginx
+    image: rnp-backend-nginx:${RNP_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: docker/prod/backend.Dockerfile
+      target: nginx
+    depends_on: [php]
+    restart: unless-stopped
+    logging: *logging
+    networks: [rnp-prod-net]
+
+  frontend:
+    container_name: rnp-prod-frontend
+    image: rnp-frontend:${RNP_IMAGE_TAG:-latest}
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      NUXT_API_BASE: http://nginx/api
+      # Served over HTTPS only: the refresh cookie must never travel in clear text.
+      NUXT_COOKIE_SECURE: "true"
+      # true when a reverse proxy (Caddy, host nginx) terminates HTTPS in front of this container.
+      NUXT_TRUST_PROXY: ${RNP_TRUST_PROXY:-true}
+    ports:
+      - "${RNP_BIND:-127.0.0.1}:${RNP_PORT:-3300}:3000"
+    depends_on: [nginx]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    logging: *logging
+    networks: [rnp-prod-net]
+
+  scheduler:
+    container_name: rnp-prod-scheduler
+    image: mcuadros/ofelia:latest
+    command: daemon --config=/etc/ofelia/config.ini
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/prod/ofelia.ini:/etc/ofelia/config.ini:ro
+    depends_on: [php, mariadb]
+    restart: unless-stopped
+    logging: *logging
+    networks: [rnp-prod-net]
+
+  # Only for a server without its own HTTPS proxy: `--profile caddy`. Needs DNS of ${RNP_DOMAIN} pointing to the
+  # server and ports 80/443 free; certificates are issued and renewed automatically.
+  caddy:
+    container_name: rnp-prod-caddy
+    image: caddy:2.8-alpine
+    profiles: ["caddy"]
+    environment:
+      RNP_DOMAIN: ${RNP_DOMAIN:?set RNP_DOMAIN in .env.prod}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/prod/Caddyfile:/etc/caddy/Caddyfile:ro
+      - rnp-prod-caddy-data:/data
+      - rnp-prod-caddy-config:/config
+    depends_on: [frontend]
+    restart: unless-stopped
+    logging: *logging
+    networks: [rnp-prod-net]
+
+networks:
+  rnp-prod-net:
+    name: rnp-prod-net
+
+volumes:
+  rnp-prod-db:
+    name: rnp-prod-db
+  rnp-prod-jwt:
+    name: rnp-prod-jwt
+  rnp-prod-caddy-data:
+    name: rnp-prod-caddy-data
+  rnp-prod-caddy-config:
+    name: rnp-prod-caddy-config

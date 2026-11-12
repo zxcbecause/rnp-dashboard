@@ -1,0 +1,17 @@
+# Context of backend.Dockerfile is the repository root: send only what the image needs.
+*
+!backend/
+!docker/prod/php.ini
+!docker/prod/nginx.conf
+
+# Never in an image: local secrets, keys, caches, dependencies installed on the host, tests.
+backend/.env.local
+backend/.env.*.local
+backend/.env.test
+backend/config/jwt/
+backend/var/
+backend/vendor/
+backend/public/bundles/
+backend/tests/
+backend/.php-cs-fixer.cache
+backend/phpstan.neon

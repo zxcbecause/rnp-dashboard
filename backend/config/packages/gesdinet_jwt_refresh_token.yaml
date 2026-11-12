@@ -1,0 +1,9 @@
+gesdinet_jwt_refresh_token:
+    refresh_token_class: App\Entity\Auth\RefreshToken
+    # 30 minute sliding idle window: every successful refresh starts it over.
+    ttl: 1800
+    ttl_update: true
+    token_parameter_name: refreshToken
+    return_expiration_parameter_name: refreshTokenExpiration
+    return_expiration: true
+    single_use: true

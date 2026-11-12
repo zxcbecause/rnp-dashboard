@@ -1,0 +1,191 @@
+# Metrics of Sales, Operations and HR as kept in «Метрики РНП» (sheet «Ноябрь», 09.11.2026).
+# Loaded with `php bin/console app:metric:catalog config/metrics/departments-2026-11.yaml` (idempotent: by code).
+# Manual unless "source" says otherwise (platform_api / bitrix with "source_config", see PlatformMetricConfig and
+# BitrixMetricConfig). Defaults: unit count, sum over time, weekly, higher is better.
+# Owner/filler default to the unit head (the head and members can enter facts either way).
+
+units:
+  Sales:
+    sort_from: 400
+    metrics:
+      - code: sales_calls
+        name: Звонки
+        card: ['Исходящие звонки собственникам', 'Σ звонков за период', 'Вручную (Алина)', 'Неделя, месяц = сумма недель']
+      - code: sales_conversations
+        name: Разговоры от 40 секунд
+        card: ['Звонки, в которых состоялся разговор дольше 40 секунд', 'Σ разговоров', 'Вручную (Алина)', 'Неделя, месяц = сумма недель']
+      - code: sales_meetings
+        name: Встречи
+        card: ['Встречи с собственниками (офлайн и онлайн)', 'Σ встреч', 'Вручную (Алина)', 'Неделя, месяц = сумма недель']
+      - code: sales_proposals_sent
+        name: Отправленные КП
+        card: ['Коммерческие предложения, отправленные собственникам', 'Σ КП', 'Вручную (Алина)', 'Неделя, месяц = сумма недель']
+      - code: sales_proposals_agreed
+        name: Согласованные КП
+        card: ['КП, условия которых собственник согласовал', 'Σ КП', 'Вручную (Алина)', 'Неделя, месяц = сумма недель']
+      - code: sales_proposals_sum
+        name: Сумма отправленных КП
+        unit: eur
+        card: ['Сумма отправленных коммерческих предложений', 'Σ сумм КП, €', 'Вручную (Алина)', 'Неделя, месяц = сумма недель']
+      # Moved from Marketing (Alina, 10.11.2026): was mkt_contracts. Every owner source counts, cold calls included.
+      - code: sales_contracts_count
+        name: Подписанные контракты
+        source: bitrix
+        source_config:
+          calculator: deals_reached_stage
+          stages: ['C4:UC_G88IW0', 'C4:UC_0IVJRK', 'C4:UC_QFV9OT', 'C4:UC_FO7C6K', 'C4:WON', 'C20:8', 'C20:9', 'C20:10', 'C20:UC_0ZXGUT', 'C20:WON']
+        card: ['Собственники, подписавшие договор', 'COUNT(сделок) по дате первого перехода на «Contrato firmado» или дальше (воронки «Propietario» и «Online Managmant»)', 'Bitrix24: crm.stagehistory.list', 'Неделя, месяц = сумма недель']
+      - code: sales_contracts_sum
+        name: Сумма подписанных контрактов
+        unit: eur
+        card: ['Сумма подписанных контрактов', 'Σ сумм контрактов, €', 'Вручную (Алина)', 'Неделя, месяц = сумма недель']
+      - code: sales_new_objects
+        name: Новые объекты
+        card: ['Объекты, переданные в управление', 'Σ объектов', 'Вручную (Алина)', 'Неделя, месяц = сумма недель']
+      - code: sales_objects_in_work
+        name: Объекты в работе
+        time_agg: last
+        card: ['Объекты в управлении на конец периода', 'Последнее значение периода', 'Вручную (Алина)', 'Состояние на дату: неделя и месяц — последнее значение']
+      - code: sales_lost_objects
+        name: Ушедшие объекты
+        direction: lower_better
+        card: ['Объекты, ушедшие из управления', 'Σ объектов', 'Вручную (Алина)', 'Неделя, месяц = сумма недель']
+
+  Operations:
+    sort_from: 500
+    metrics:
+      - code: ops_cleaning_sum
+        name: Сумма за сделанные уборки
+        unit: eur
+        card: ['Стоимость выполненных уборок', 'Σ стоимости уборок, €', 'Вручную (Нина)', 'Неделя, месяц = сумма недель']
+      - code: ops_cleaning_commission_sasha
+        name: Комиссия с уборки (Саша)
+        unit: eur
+        card: ['Комиссия с уборок, выполненных Сашей', 'Σ комиссий, €', 'Вручную (Нина)', 'Неделя, месяц = сумма недель', 'Часть общей комиссии']
+      - code: ops_cleaning_commission_acme
+        name: Комиссия с уборки (Acme)
+        unit: eur
+        card: ['Комиссия с уборок, выполненных Acme', 'Σ комиссий, €', 'Вручную (Нина)', 'Неделя, месяц = сумма недель', 'Часть общей комиссии']
+      - code: ops_cleaning_commission
+        name: Комиссия с уборки (Саша + Acme)
+        unit: eur
+        time_agg: formula
+        formula: ops_cleaning_commission_sasha + ops_cleaning_commission_acme
+        card: ['Общая комиссия с уборок', 'Комиссия Саши + комиссия Acme', 'Расчёт из базовых метрик', 'Неделя, месяц']
+      - code: ops_cleanings_planned
+        name: Запланированные уборки
+        card: ['Уборки, запланированные на период', 'Σ уборок', 'Вручную (Нина); позже — из задач уборки платформы', 'Неделя, месяц = сумма недель']
+      # 10.11.2026: guest check-outs match Nina's counts week by week (05.10–08.11: 47/40, 50/53, 59/60, 41/53,
+      # 33/34); she counts on the cleaning day, so Sunday check-outs move to Monday. The platform's housekeeping
+      # tasks are not closed by the team yet (3 completed of ~300) and cannot be used.
+      - code: ops_cleanings_done
+        name: Сделанные уборки
+        source: platform_api
+        source_config: {calculator: bookings_count, date_field: departure_date}
+        card: ['Уборки после выезда гостей (по выездам гостевых броней)', 'COUNT(booking) по дате выезда; статусы подтверждённых броней, без собственников и отмен', 'API платформы: GET /api/bookings', 'Неделя, месяц = сумма недель; уборка в день выезда (у Нины воскресные выезды попадают на понедельник)']
+      - code: ops_extra_works_planned
+        name: Запланированные доп. работы
+        card: ['Дополнительные работы (ремонты и т. п.), запланированные на период', 'Σ работ', 'Вручную (Нина)', 'Неделя, месяц = сумма недель']
+      - code: ops_extra_works_pending
+        name: Висящие доп. работы
+        direction: lower_better
+        time_agg: last
+        card: ['Невыполненные дополнительные работы на конец периода', 'Последнее значение периода', 'Вручную (Нина)', 'Состояние на дату']
+      - code: ops_extra_works_sum
+        name: Сумма доп. работ
+        unit: eur
+        card: ['Стоимость выполненных дополнительных работ', 'Σ, €', 'Вручную (Нина)', 'Неделя, месяц = сумма недель']
+      - code: ops_extra_works_income
+        name: Заработок с доп. работ
+        unit: eur
+        card: ['Доход с ремонтов и некомиссионных работ (Саша + Acme)', 'Σ, €', 'Вручную (Нина)', 'Неделя, месяц = сумма недель']
+      - code: ops_complaints_cleaning_share
+        name: Жалобы на уборку, %
+        unit: percent
+        direction: lower_better
+        time_agg: avg
+        card: ['Доля заездов с жалобой на уборку', 'Жалобы на уборку / заезды', 'Вручную (Нина)', 'Неделя; месяц = среднее недель']
+      - code: ops_complaints_tech_share
+        name: Жалобы на тех. неполадки, %
+        unit: percent
+        direction: lower_better
+        time_agg: avg
+        card: ['Доля заездов с жалобой на технические неполадки', 'Жалобы на тех. неполадки / заезды', 'Вручную (Нина)', 'Неделя; месяц = среднее недель']
+
+  HR:
+    sort_from: 600
+    metrics:
+      - code: hr_onboarded
+        name: Прошедшие онбординг
+        card: ['Новые сотрудники, прошедшие онбординг', 'Σ сотрудников', 'Вручную (Евгения)', 'Неделя, месяц = сумма недель']
+      - code: hr_cv_viewed
+        name: Просмотрено резюме
+        card: ['Просмотренные резюме кандидатов', 'Σ резюме', 'Вручную (Евгения)', 'Неделя, месяц = сумма недель']
+      - code: hr_contacts
+        name: Контакты с кандидатами
+        card: ['Кандидаты, с которыми состоялся контакт', 'Σ контактов', 'Вручную (Евгения)', 'Неделя, месяц = сумма недель']
+      - code: hr_interviews
+        name: Собеседования
+        card: ['Проведённые собеседования', 'Σ собеседований', 'Вручную (Евгения)', 'Неделя, месяц = сумма недель']
+      - code: hr_final_interviews
+        name: Финальные собеседования
+        card: ['Проведённые финальные собеседования', 'Σ собеседований', 'Вручную (Евгения)', 'Неделя, месяц = сумма недель']
+      - code: hr_test_tasks
+        name: Тестовые задания
+        card: ['Выданные кандидатам тестовые задания', 'Σ заданий', 'Вручную (Евгения)', 'Неделя, месяц = сумма недель']
+      - code: hr_offers_accepted
+        name: Принятые офферы
+        card: ['Офферы, принятые кандидатами', 'Σ офферов', 'Вручную (Евгения)', 'Неделя, месяц = сумма недель']
+      - code: hr_hires
+        name: Выход сотрудников
+        card: ['Новые сотрудники, вышедшие на работу', 'Σ сотрудников', 'Вручную (Евгения)', 'Неделя, месяц = сумма недель']
+      - code: hr_project_onboarding_cs
+        name: Проект «Онбординг CS», готовность
+        unit: percent
+        time_agg: last
+        granularity: month
+        card: ['Готовность проекта онбординга CS', 'Последнее значение, % готовности', 'Вручную (Евгения)', 'Месяц, состояние на дату']
+      - code: hr_project_hiring
+        name: Проект «Найм и пребординг», готовность
+        unit: percent
+        time_agg: last
+        granularity: month
+        card: ['Готовность проекта найма и пребординга', 'Последнее значение, % готовности', 'Вручную (Евгения)', 'Месяц, состояние на дату']
+      - code: hr_probation_pass_last
+        name: Прохождение ИС (последний поток), %
+        unit: percent
+        time_agg: last
+        granularity: month
+        card: ['Доля сотрудников последнего потока, прошедших испытательный срок', 'Прошли ИС / вышли на ИС', 'Вручную (Евгения)', 'Месяц, состояние на дату']
+      - code: hr_probation_pass_year
+        name: Прохождение ИС за год, %
+        unit: percent
+        time_agg: last
+        granularity: month
+        card: ['Доля сотрудников, прошедших испытательный срок с начала года', 'Прошли ИС / вышли на ИС', 'Вручную (Евгения)', 'Месяц, состояние на дату']
+      - code: hr_one_on_one
+        name: Встречи 1-1, %
+        unit: percent
+        time_agg: last
+        granularity: month
+        card: ['Доля запланированных встреч 1-1, которые состоялись', 'Проведено / запланировано', 'Вручную (Евгения)', 'Месяц']
+      - code: hr_turnover_month
+        name: Текучесть за месяц, %
+        unit: percent
+        direction: lower_better
+        time_agg: last
+        granularity: month
+        card: ['Доля сотрудников, ушедших за месяц', 'Ушедшие / среднесписочная численность', 'Вручную (Евгения)', 'Месяц']
+      - code: hr_turnover_year
+        name: Текучесть за год (скользящая), %
+        unit: percent
+        direction: lower_better
+        time_agg: last
+        granularity: month
+        card: ['Доля сотрудников, ушедших за последние 12 месяцев', 'Ушедшие за 12 мес. / среднесписочная численность', 'Вручную (Евгения)', 'Месяц, скользящее окно']
+      - code: hr_enps
+        name: eNPS
+        unit: score
+        time_agg: last
+        granularity: month
+        card: ['Индекс лояльности сотрудников (от −100 до 100)', '% промоутеров − % критиков', 'Вручную (Евгения), по опросу', 'Месяц, по последнему опросу']

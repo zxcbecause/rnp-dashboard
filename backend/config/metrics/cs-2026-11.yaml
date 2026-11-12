@@ -1,0 +1,117 @@
+# CS rows of «Метрики РНП» (sheet «Ноябрь») not covered before, 10.11.2026.
+# Loaded with `php bin/console app:metric:catalog config/metrics/cs-2026-11.yaml` (idempotent: by code).
+# Reviews are manual until the Avantio export / Google Business Profile access arrive (then they switch source).
+
+units:
+  Customer Service:
+    sort_from: 210
+    metrics:
+      - code: cs_calls_lost
+        name: Потерянные звонки
+        direction: lower_better
+        source: bitrix
+        source_config: {calculator: calls, direction: incoming, missed: true, no_follow_up_hours: 24}
+        card: ['Пропущенные входящие, по которым за 24 часа не было ни исходящего, ни принятого звонка по той же CRM-карточке (лид, сделка, контакт, компания)', 'COUNT(пропущенных входящих без follow-up за 24 ч), без одобренных исключений; звонок попадает в счёт, когда его 24 часа прошли', 'Bitrix24: crm.activity.list (TYPE_ID = 2)', 'Неделя, месяц']
+      - code: cs_lost_calls_share
+        name: Потерянные звонки — %
+        unit: percent
+        direction: lower_better
+        source: bitrix
+        time_agg: formula
+        formula: cs_calls_lost / cs_calls_total
+        card: ['Доля потерянных звонков (без follow-up за 24 ч) от всех входящих', 'Потерянные / Входящие звонки', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне']
+      - code: cs_direct_commission
+        name: Комиссия с перехваченных бронирований
+        unit: eur
+        source: platform_api
+        time_agg: formula
+        formula: 0.1 * cs_direct_base_sum
+        card: ['Комиссия 10 % со всех перехваченных бронирований (manual, manual robo, manual prolongación)', '10 % × сумма перехваченных бронирований (rentalPrice, по дате создания)', 'Расчёт из базовых метрик', 'Неделя, месяц']
+      - code: cs_reviews_portals_positive
+        name: 'Отзывы на порталах: положительные'
+        card: ['Положительные отзывы гостей на порталах (Avantio, оценка ≥ 6 из 10)', 'Σ отзывов за период', 'Вручную (выгрузка Avantio)', 'Неделя, месяц = сумма недель']
+      - code: cs_reviews_portals_negative
+        name: 'Отзывы на порталах: отрицательные'
+        direction: lower_better
+        card: ['Отрицательные отзывы гостей на порталах (Avantio, оценка < 6 из 10)', 'Σ отзывов за период', 'Вручную (выгрузка Avantio)', 'Неделя, месяц = сумма недель']
+      - code: cs_reviews_google_positive
+        name: 'Отзывы в Google: положительные'
+        card: ['Положительные отзывы в Google Business Profile (4–5 звёзд)', 'Σ отзывов за период', 'Вручную (Google Business Profile)', 'Неделя, месяц = сумма недель']
+      - code: cs_reviews_google_negative
+        name: 'Отзывы в Google: отрицательные'
+        direction: lower_better
+        card: ['Отрицательные отзывы в Google Business Profile (1–3 звезды)', 'Σ отзывов за период', 'Вручную (Google Business Profile)', 'Неделя, месяц = сумма недель']
+      # Gleb, 11.11.2026 (internal notes). Existing metrics: definitions as
+      # in the fixtures, appended here so that earlier entries keep their sort.
+      # Q9: at most 5 % of the incoming calls may be missed. The plan in calls follows the plan of the share
+      # (cs_missed_calls_share, 0.05 from November 2026) and the incoming calls of the same period.
+      - code: cs_calls_missed
+        name: Пропущенные звонки
+        direction: lower_better
+        source: bitrix
+        source_config: {calculator: calls, direction: incoming, missed: true}
+        plan_formula: cs_missed_calls_share.plan * cs_calls_total
+        daily_avg: true
+        card: ['Входящие звонки без ответа, кроме исключённых руководителем (технический сбой, спам, тестовые, свои)', 'COUNT(входящих с флагом «пропущенный»), без подтверждённых исключений', 'Bitrix24: crm.activity.list (SETTINGS.MISSED_CALL)', 'Неделя, месяц']
+      # Q6: an approved exclusion takes the call out of the incoming calls as well (calculator `calls`).
+      - code: cs_calls_total
+        name: Входящие звонки
+        source: bitrix
+        source_config: {calculator: calls, direction: incoming}
+        # Q7: totals stay, the average per day is shown next to them.
+        daily_avg: true
+        card: ['Все входящие звонки, кроме исключённых руководителем (технический сбой, спам, тестовые, свои)', 'COUNT(звонков DIRECTION = входящий) по времени начала, без подтверждённых исключений', 'Bitrix24: crm.activity.list (TYPE_ID = 2)', 'Неделя, месяц', 'Знаменатель % пропущенных']
+      # Q8: the figure Gleb enters counts only chats created 09:00–24:00 and leaves out transferred chats.
+      - code: cs_response_minutes
+        name: Среднее время ответа
+        unit: minutes
+        direction: lower_better
+        time_agg: avg
+        card: ['Среднее время первого ответа гостю в чате. Учитываются только чаты, созданные с 09:00 до 24:00; чаты, переданные другому отделу, и выбросы, исключённые руководителем, не учитываются', 'AVG(время первого ответа) по чатам, созданным 09:00–24:00, без переданных', 'Вручную (дашборд SimpleSales)', 'Неделя; месяц = среднее недель']
+      # Gleb, 11.11.2026, Q5: two portals for relocated guests are being added to Avantio / the platform.
+      # «Manual reubicación» (the owner closed the dates, the guest was moved) is an ordinary manual booking.
+      # «Manual reubicación por incidencia» (moved because of an incident) counts nowhere — neither as incoming nor
+      # as manual — and is shown on its own as a problem. The names are Gleb's wording: no booking carries them yet
+      # (12.11.2026); portal names compare case- and accent-insensitively. Fix them here if the platform differs.
+      - code: cs_incoming_sum
+        name: Входящие бронирования — сумма
+        unit: eur
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: creation_date, amount_field: rental_price, exclude_portals: ['Manual reubicación por incidencia']}
+        card: ['Сумма всех бронирований, созданных за период (все порталы, кроме переселений из-за инцидента)', 'SUM(booking.rentalPrice) по дате создания', 'API платформы: GET /api/bookings', 'Неделя, месяц', 'Знаменатель доли прямых по базе']
+      - code: cs_incoming_count
+        name: Входящие бронирования — количество
+        source: platform_api
+        source_config: {calculator: bookings_count, date_field: creation_date, exclude_portals: ['Manual reubicación por incidencia']}
+        card: ['Число всех бронирований, созданных за период (все порталы, кроме переселений из-за инцидента)', 'COUNT(booking) по дате создания', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: cs_direct_base_sum
+        name: Прямые бронирования по базе — сумма
+        unit: eur
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: creation_date, amount_field: rental_price, portals: [Manual, Manual robo, Manual prolongación, Manual reubicación]}
+        plan_formula: cs_direct_base_share.plan * cs_incoming_sum
+        card: ['Сумма прямых бронирований, оформленных CS: порталы Manual, Manual robo, Manual prolongación, Manual reubicación', 'SUM(booking.rentalPrice) по дате создания', 'API платформы: GET /api/bookings', 'Неделя, месяц', 'Числитель доли прямых по базе']
+      - code: cs_manual_sum
+        name: Сумма manual
+        unit: eur
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: creation_date, amount_field: rental_price, portals: [Manual, Manual reubicación]}
+        card: ['Сумма бронирований с порталом «Manual» или «Manual reubicación» (переселение: собственник закрыл даты)', 'SUM(booking.rentalPrice) по дате создания', 'API платформы: GET /api/bookings', 'Неделя, месяц', 'Часть прямых по базе']
+      - code: cs_manual_count
+        name: Количество manual
+        source: platform_api
+        source_config: {calculator: bookings_count, date_field: creation_date, portals: [Manual, Manual reubicación]}
+        card: ['Число бронирований с порталом «Manual» или «Manual reubicación» (переселение: собственник закрыл даты)', 'COUNT(booking) по дате создания', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: cs_relocation_incident_count
+        name: Переселения из-за инцидента — количество
+        direction: lower_better
+        source: platform_api
+        source_config: {calculator: bookings_count, date_field: creation_date, portals: ['Manual reubicación por incidencia']}
+        card: ['Бронирования с порталом «Manual reubicación por incidencia»: гостя пришлось переселить из-за инцидента. Не входят ни во входящие, ни в manual', 'COUNT(booking) по дате создания', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: cs_relocation_incident_sum
+        name: Переселения из-за инцидента — сумма
+        unit: eur
+        direction: lower_better
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: creation_date, amount_field: rental_price, portals: ['Manual reubicación por incidencia']}
+        card: ['Сумма бронирований с порталом «Manual reubicación por incidencia» (переселение из-за инцидента). Не входит ни во входящие, ни в manual', 'SUM(booking.rentalPrice) по дате создания', 'API платформы: GET /api/bookings', 'Неделя, месяц']

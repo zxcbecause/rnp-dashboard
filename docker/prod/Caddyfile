@@ -1,0 +1,13 @@
+# HTTPS in front of the frontend, used only with `--profile caddy` (a server without its own proxy).
+# Caddy obtains and renews the Let's Encrypt certificate for the domain by itself.
+{$RNP_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# Caddy replaces any client-sent X-Forwarded-For with the real address, so the frontend can trust it.
+	reverse_proxy frontend:3000
+}

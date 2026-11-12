@@ -1,0 +1,627 @@
+{
+  "app": {
+    "title": "RNP · Acme"
+  },
+  "dataStatus": {
+    "source": {
+      "platform_api": "Platform",
+      "bitrix": "Bitrix24"
+    },
+    "ok": "data as of {time}",
+    "failing": "data as of {time}, last sync failed ({resources})",
+    "stale": "data is outdated — last update {time}",
+    "never": "not synced yet",
+    "off": "not connected"
+  },
+  "nav": {
+    "cabinet": "My cabinet",
+    "rnpWeek": "RNP week",
+    "metrics": "Metrics",
+    "sprints": "Sprints",
+    "errors": "Error log",
+    "actions": "Actions",
+    "tokens": "Push API tokens",
+    "sync": "Sync",
+    "calls": "Missed calls",
+    "users": "Users",
+    "org": "Org structure",
+    "help": "Help"
+  },
+  "auth": {
+    "subtitle": "Hand on the pulse",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "invalidCredentials": "Invalid email or password",
+    "tooManyAttempts": "Too many attempts. Try again later",
+    "changePassword": {
+      "title": "Change password",
+      "current": "Current password",
+      "new": "New password",
+      "repeat": "Repeat the new password",
+      "rule": "At least {n} characters",
+      "required": "Fill in the current and the new password",
+      "mismatch": "The new passwords do not match",
+      "submit": "Change",
+      "done": "Password changed. Sign in again with the new one"
+    },
+    "login": {
+      "eyebrow": "Acme metrics · RNP",
+      "titleStart": "Hand on the",
+      "titleAccent": "pulse",
+      "lead": "Plan, fact and completion of every department — every week, in one place. The data arrives by itself, you make the decisions.",
+      "features": {
+        "planFact": "Plan / fact / completion",
+        "sources": "Platform and Bitrix24",
+        "actions": "Actions and execution rate"
+      },
+      "heading": "Sign in",
+      "hint": "Use your work email and password",
+      "liveNote": "Platform and Bitrix24 data refresh every 30 minutes"
+    }
+  },
+  "roles": {
+    "head": "Head",
+    "member": "Member",
+    "viewer": "Viewer",
+    "admin": "Administrator"
+  },
+  "cabinet": {
+    "subtitle": "the head's week",
+    "overview": "Overview",
+    "branchMetrics": "Branch metrics",
+    "owner": "Owner",
+    "allOwners": "All owners",
+    "status": "Status",
+    "allStatuses": "All statuses",
+    "factPlan": "Actual / plan",
+    "progress": "Completion",
+    "nothingFiltered": "Nothing matches the filters",
+    "overall": "Overall completion",
+    "overallCaption": "metrics met",
+    "total": "Total",
+    "runRate": "Month run rate",
+    "forecast": "Forecast",
+    "noRunRate": "Only summable metrics have a forecast",
+    "execution": "Execution rate",
+    "executionWeek": "Week",
+    "executionMonth": "Month",
+    "executionParts": "functions {bf} · roadmap {rm} · sprint {sp}",
+    "missed": "Missed actions",
+    "allActions": "All actions",
+    "noMissed": "All done",
+    "noTrend": "No data for the previous week",
+    "trendWeek": "{pct}% vs previous week",
+    "noUnits": "No units available",
+    "noMemberships": "You are not in any unit yet",
+    "myRoles": "My roles",
+    "myBranch": "My branch",
+    "trendWeekPerDay": "{pct}% vs previous week (per day)",
+    "lastFinished": "last finished week"
+  },
+  "rnpWeek": {
+    "subtitle": "Weekly plan / fact / completion"
+  },
+  "metrics": {
+    "subtitle": "Metric logic card and trend chart",
+    "backToRnp": "Back to unit RNP",
+    "notFound": "Metric not found or not available",
+    "chooseFromRnp": "Pick a metric on the RNP week screen to open its card and trend chart.",
+    "card": {
+      "title": "Metric logic",
+      "whatMeasured": "What is measured",
+      "formula": "Formula",
+      "calculation": "Calculation",
+      "planCalculation": "Plan calculation",
+      "source": "Source",
+      "period": "Period",
+      "usedIn": "Used in",
+      "direction": "Direction",
+      "owner": "Owner",
+      "filler": "Filled in by",
+      "automatic": "automatically"
+    },
+    "direction": {
+      "higher_better": "higher is better",
+      "lower_better": "lower is better"
+    },
+    "chart": {
+      "title": "Trend",
+      "weeks": "Weeks",
+      "months": "Months",
+      "prevYear": "A year ago",
+      "range": "{n} mo."
+    },
+    "hero": {
+      "week": "Week {from}–{to}",
+      "noFacts": "No facts for the selected period yet",
+      "trend": "{pct}% vs previous period",
+      "trendPerDay": "{pct}% vs previous period (per day)"
+    },
+    "granularity": {
+      "week": "weekly",
+      "month": "monthly"
+    },
+    "actions": {
+      "title": "Actions on the metric",
+      "all": "All department actions",
+      "noFunctions": "No base functions for this metric",
+      "noRoadmap": "No roadmap items for this metric"
+    }
+  },
+  "sprints": {
+    "subtitle": "Weekly unit tasks (Mon–Sun) with progress",
+    "create": "Add task",
+    "edit": "Sprint task",
+    "title": "Task",
+    "priority": "Priority",
+    "tag": "Tag",
+    "progress": "Progress",
+    "resultNote": "Result",
+    "nextStep": "Next step",
+    "link": "Link",
+    "delete": "Delete",
+    "confirmDelete": "Delete the task?",
+    "empty": "No tasks this week",
+    "summary": "{done} of {total} done",
+    "avg": "average progress {pct} %",
+    "carry": "Carry over unfinished ({n})",
+    "carried": "Tasks carried over: {n}",
+    "carriedFrom": "carried from {week}",
+    "pull": "Pull recurring",
+    "pulled": "Recurring tasks added: {n}",
+    "recurring": {
+      "open": "Recurring tasks",
+      "title": "Recurring tasks of the unit",
+      "hint": "Weekly ones go to every week, monthly to the week of the month's first Monday, quarterly to the quarter's. Added with “Pull recurring”.",
+      "empty": "No recurring tasks",
+      "new": "New recurring task",
+      "add": "Add"
+    },
+    "heading": "Week tasks {from} – {to}"
+  },
+  "errorLog": {
+    "subtitle": "Significant mistakes with consequences — for the unit and its whole branch",
+    "create": "Report a mistake",
+    "edit": "Mistake",
+    "significantOnly": "Significant mistakes only: money, blocked work, client impact.",
+    "description": "What happened",
+    "occurredOn": "Date",
+    "impactType": "Consequence",
+    "impactAmount": "Loss, €",
+    "required": "required",
+    "cause": "Cause",
+    "prevention": "Prevention",
+    "owner": "Owner",
+    "status": "Status",
+    "from": "From",
+    "to": "To",
+    "total": "Total",
+    "openCount": "Open",
+    "moneyTotal": "Loss",
+    "empty": "No mistakes in the period",
+    "reportedBy": "reported by {name}",
+    "ownedBy": "owner: {name}",
+    "impact": {
+      "money": "Money",
+      "blocked": "Blocked",
+      "client": "Client",
+      "other": "Other"
+    },
+    "statuses": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "resolved": "Resolved"
+    },
+    "openHint": "Need attention",
+    "allClosed": "All closed",
+    "moneyHint": "Errors with money loss: {n}",
+    "byImpact": "By impact",
+    "entries": "Entries"
+  },
+  "common": {
+    "comingSoon": "This section arrives in the next iterations",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "errors": {
+    "unknown": "Something went wrong. Please try again"
+  },
+  "rnp": {
+    "metric": "Metric",
+    "week": "Week",
+    "month": "Month",
+    "plan": "Plan",
+    "fact": "Fact",
+    "factToDate": "Fact to date",
+    "runRate": "Run rate",
+    "runRateHint": "Month forecast: month-to-date fact / elapsed days × days in month; % of the month plan",
+    "weekLabel": "Week {n}: {from} – {to}",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
+    "currentWeek": "Current week",
+    "monthlyOnly": "tracked monthly",
+    "noMetrics": "No metrics in this unit yet",
+    "unitNotAvailable": "Unit not found or not available",
+    "clickToEdit": "Click to enter a value",
+    "enter": "enter",
+    "legend": "Green — plan met, yellow — at risk (between the thresholds), red — below the threshold, grey — no plan. Month fact is the sum of weeks (ratios are recomputed). Pencil — manual entry.",
+    "tags": {
+      "formula": "formula",
+      "rollup": "roll-up",
+      "manual": "manual",
+      "platform_api": "platform",
+      "bitrix": "Bitrix24",
+      "push_api": "script",
+      "lowerBetter": "lower is better",
+      "correctedManually": "corrected manually",
+      "planFormula": "plan by formula"
+    },
+    "view": {
+      "open": "Customize view",
+      "title": "Metric order and visibility",
+      "hint": "Only for you: untick to hide a metric, use the arrows to reorder. Data and permissions do not change.",
+      "up": "Up",
+      "down": "Down",
+      "reset": "Reset",
+      "keepOne": "Keep at least one metric visible.",
+      "hiddenCount": "Hidden metrics: {n}.",
+      "change": "Change"
+    },
+    "weekLabelShort": "Week {n}: {from}–{to}",
+    "perDay": "≈ {value} per day"
+  },
+  "org": {
+    "selectUnit": "Select a unit"
+  },
+  "actions": {
+    "subtitle": "Base functions, roadmap and Execution rate of the unit",
+    "legend": "Execution rate = done / planned: base function checks and roadmap items due in the period whose deadline has passed (or that are already done). Click a check: done → not done → clear.",
+    "owner": "Owner",
+    "rate": {
+      "week": "Execution rate — week",
+      "month": "Execution rate — month",
+      "doneOf": "{done} of {planned}",
+      "split": "functions {bfDone}/{bfPlanned} · roadmap {rmDone}/{rmPlanned} · sprint {spDone}/{spPlanned}"
+    },
+    "periodicity": {
+      "daily": "Daily (Mon–Fri)",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly"
+    },
+    "slot": {
+      "done": "Done",
+      "not_done": "Not done",
+      "missed": "Missed",
+      "pending": "Waiting",
+      "future": "Not started yet",
+      "clickHint": "click to change"
+    },
+    "bf": {
+      "heading": "Base functions",
+      "create": "Add function",
+      "edit": "Edit function",
+      "title": "Action",
+      "periodicity": "Periodicity",
+      "dueText": "Deadline in the period",
+      "dueTextHint": "e.g. by the 20th",
+      "metric": "Metric (optional)",
+      "noMetric": "Not tied to a metric",
+      "active": "Active",
+      "empty": "No base functions yet"
+    },
+    "rm": {
+      "heading": "Roadmap",
+      "create": "Add item",
+      "edit": "Edit item",
+      "metric": "Metric",
+      "title": "Action",
+      "dueDate": "Due date",
+      "status": "Status",
+      "expectedEffect": "Expected effect",
+      "expected": "Expected effect",
+      "overdue": "overdue",
+      "due": "due {date}",
+      "assess": "Assess effect",
+      "assessTitle": "Did it affect the metric?",
+      "effectNote": "Comment (optional)",
+      "history": "History",
+      "empty": "No items",
+      "filterOpen": "Open",
+      "filterAll": "All"
+    },
+    "status": {
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "done": "Done",
+      "cancelled": "Cancelled"
+    },
+    "effect": {
+      "affected": "Affected",
+      "not_affected": "No effect"
+    },
+    "history": {
+      "created": "created",
+      "status": "status: {from} → {to}",
+      "field": "{field}: {from} → {to}",
+      "fields": {
+        "title": "title",
+        "owner": "owner",
+        "due_date": "due date",
+        "expected_effect": "expected effect"
+      }
+    },
+    "missed": {
+      "heading": "Missed",
+      "hint": "Last 30 days",
+      "roadmap": "Roadmap",
+      "baseFunction": "Base function",
+      "due": "due {date}",
+      "empty": "All done"
+    }
+  },
+  "tokens": {
+    "subtitle": "A token lets a head's script push facts of the \"script\" metrics of its unit and the units below. The token is shown only once — store it right away.",
+    "create": "Issue a token",
+    "issue": "Issue",
+    "name": "Name",
+    "unit": "Unit",
+    "hint": "Starts with",
+    "lastUsed": "Last used",
+    "status": "Status",
+    "active": "active",
+    "revokedAt": "revoked {date}",
+    "never": "never used",
+    "revoke": "Revoke",
+    "revokeConfirm": "Revoke the token \"{name}\"? Its script will stop working.",
+    "empty": "No tokens yet",
+    "adminOnly": "Administrators only",
+    "nameRule": "Lowercase latin letters, digits, \".\", \"_\", \"-\"; 2–32 characters. E.g. cs-nps-script",
+    "unitRule": "The script may write metrics of this unit and every unit below it",
+    "fillBoth": "Fill in the name and the unit",
+    "createdOnce": "Token \"{name}\" issued. Copy it now — it will not be shown again:",
+    "copy": "Copy",
+    "copied": "Copied",
+    "done": "Done",
+    "usage": "The script sends values like this:"
+  },
+  "layout": {
+    "expand": "Expand menu",
+    "collapse": "Collapse menu",
+    "enterFact": "Enter a fact",
+    "admin": "Administration",
+    "search": "Search a metric…",
+    "searchEmpty": "Nothing found",
+    "notifications": "Notifications",
+    "userMenu": "User menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "ui": {
+    "status": {
+      "done": "Done",
+      "risk": "At risk",
+      "missed": "Missed",
+      "none": "No plan"
+    }
+  },
+  "sync": {
+    "subtitle": "When the platform and Bitrix24 data were last updated (every 30 minutes, fully at night)",
+    "refresh": "Refresh",
+    "dataAsOf": "All data is newer than {time}",
+    "resource": "Resource",
+    "lastRun": "Last run",
+    "lastSuccess": "Last success",
+    "health": {
+      "ok": "Working",
+      "failing": "Last sync failed",
+      "stale": "Data is outdated",
+      "off": "Not connected"
+    }
+  },
+  "ai": {
+    "notConfigured": "AI is not configured: an administrator has to add the Anthropic API key on the server.",
+    "review": {
+      "title": "AI weekly review",
+      "generate": "Generate",
+      "regenerate": "Refresh",
+      "thinking": "AI is analysing the week: plan and fact, month forecast, actions. Usually under a minute.",
+      "empty": "Press “Generate”: AI reviews the week of the unit — what is missed, what drags the month down and what to discuss.",
+      "generatedAt": "Generated {time} · {name}"
+    },
+    "assistant": {
+      "open": "Ask AI",
+      "title": "AI assistant",
+      "subtitle": "Answers from the dashboard data and shows where things are",
+      "intro": "Ask about your unit's numbers or how the dashboard works. The assistant sees only what you can see and changes nothing.",
+      "examples": [
+        "What is missed this week and why?",
+        "How did direct bookings change over 3 months compared to last year?",
+        "How do I enter a fact and who can set the plan?",
+        "What is run rate and how is it calculated?"
+      ],
+      "placeholder": "Your question…",
+      "hint": "Enter to send, Shift+Enter for a new line. Answers take up to a minute.",
+      "thinking": "Looking at the data…",
+      "used": "Looked at:",
+      "send": "Send",
+      "clear": "New conversation",
+      "close": "Close"
+    },
+    "anomaly": {
+      "why": "Why: {name}",
+      "title": "Why: {name}",
+      "thinking": "AI is reading the metric's data…",
+      "generatedAt": "Generated {time} · {name}",
+      "openMetric": "Open the metric",
+      "kindWeek": "Week plan of {date} missed",
+      "kindForecast": "Month forecast below plan"
+    }
+  },
+  "deviation": {
+    "title": "Deviation review",
+    "explain": "Explain the deviation",
+    "week": "Week {from}–{to}",
+    "completion": "completion {pct}",
+    "aiDraft": "AI draft",
+    "draftHint": "AI draft from the metric and department data — check and edit before saving.",
+    "reason": "Why it happened",
+    "reasonPlaceholder": "E.g. ads were stopped for 3 days because of an unpaid invoice",
+    "action": "What we do",
+    "actionPlaceholder": "E.g. pay the invoice in advance, restore the budget by 15.11",
+    "toTask": "Make it a task:",
+    "toRoadmap": "To roadmap",
+    "toSprint": "To sprint",
+    "addedRoadmap": "Item added to the metric roadmap",
+    "addedSprint": "Task added to this week's sprint",
+    "sprintTag": "deviation",
+    "remove": "Remove review"
+  },
+  "pace": {
+    "need": "to plan {required}/day · now {current}",
+    "allowed": "limit {required}/day · now {current}",
+    "reached": "month plan met",
+    "exceeded": "month budget used up",
+    "hint": "What each of the remaining {days} days has to bring to reach the plan, and the average pace since the 1st"
+  },
+  "calls": {
+    "subtitle": "Incoming calls from Bitrix24. A call that does not belong to the statistics (technical failure, spam, test, own call) leaves the incoming and the missed calls once the head approves.",
+    "unit": "Unit",
+    "from": "From",
+    "to": "To",
+    "noUnits": "No unit counts missed calls.",
+    "pendingTitle": "Awaiting decision: {n}",
+    "pendingHint": "Requests wait for the head of the unit.",
+    "pendingHintHead": "Approve to leave the call out of the incoming and missed calls, reject to keep it. The decision is final.",
+    "listTitle": "Missed calls {from} – {to}",
+    "listHint": "Find your call by its time or Bitrix card and request an exclusion with a reason. Calls from {date} can be excluded.",
+    "empty": "No missed incoming calls in this period.",
+    "responsible": "Bitrix user #{id}",
+    "openCrm": "Bitrix card",
+    "request": "Exclude",
+    "requestTitle": "Exclude the call from the statistics",
+    "requestHint": "The call leaves the incoming and missed-calls statistics only after the head of the unit approves.",
+    "reason": "Reason",
+    "reasonPlaceholder": "E.g. the office internet was down 10:00–10:40",
+    "reasonBy": "Reason ({name})",
+    "send": "Send for approval",
+    "decide": "Decide",
+    "decideTitle": "Call exclusion",
+    "decisionNote": "Comment (optional)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "withdraw": "Withdraw",
+    "callAt": "Call {at}",
+    "requestedBy": "Requested by {name}",
+    "recalcLater": "Decision saved. The statistics update with the next sync (within 30 minutes).",
+    "status": {
+      "pending": "awaiting decision",
+      "approved": "excluded",
+      "rejected": "rejected"
+    },
+    "requestHintHead": "You are the head of the unit: the call leaves the incoming and missed-calls statistics at once, with no separate approval. The decision is final.",
+    "excludeNow": "Exclude from the statistics",
+    "filterMissed": "Missed",
+    "filterAll": "All incoming",
+    "listTitleAll": "Incoming calls {from} – {to}",
+    "emptyAll": "No incoming calls in this period.",
+    "answered": "answered",
+    "categoryLabel": "Why the call does not count",
+    "category": {
+      "technical": "Technical failure",
+      "spam": "Spam",
+      "test": "Test call",
+      "own": "Own call",
+      "other": "Other"
+    },
+    "image": "Screenshot (optional)",
+    "imageChoose": "Attach an image",
+    "imageRemove": "Remove",
+    "imageHint": "PNG, JPG or WebP up to 4 MB.",
+    "imageWrongType": "Only PNG, JPG or WebP images can be attached.",
+    "imageTooBig": "The image is larger than 4 MB.",
+    "imageUnreadable": "The file could not be read.",
+    "viewImage": "screenshot",
+    "imageTitle": "Screenshot of the request",
+    "imageOpen": "Open in full size"
+  },
+  "notifications": {
+    "empty": "No new notifications",
+    "unread": "Notifications: {n} new",
+    "pendingCalls": "Call exclusions awaiting your decision: {n}",
+    "approved": "Exclusion of the call {at} approved ({name})",
+    "rejected": "Exclusion of the call {at} rejected ({name})",
+    "andMore": "{list} and {n} more",
+    "metricRed": "Week plan of {week} missed: {list}",
+    "runRateBehind": "Month forecast below plan: {list}",
+    "factsMissing": "Facts of the week of {week} not entered: {list}",
+    "actionsMissed": "Overdue actions: {n}",
+    "errorsNew": "New error log entries this week: {n}",
+    "dataStale": "{source} data is out of date",
+    "dataFailing": "{source} sync is failing",
+    "sourcePlatform": "Acme platform",
+    "sourceBitrix": "Bitrix24"
+  },
+  "admin": {
+    "users": {
+      "subtitle": "Staff accounts. A password is shown once — hand it over personally; the person can change it (key in the header).",
+      "create": "Add user",
+      "add": "Add",
+      "email": "Email",
+      "name": "Name",
+      "units": "Units",
+      "status": "Status",
+      "active": "active",
+      "inactive": "deactivated",
+      "admin": "administrator",
+      "you": "you",
+      "noUnits": "no unit",
+      "edit": "Edit",
+      "editTitle": "User {email}",
+      "adminLabel": "Administrator: sees everything, manages accounts, org structure, tokens",
+      "activeLabel": "Account active: can sign in",
+      "resetPassword": "New password",
+      "resetConfirm": "Issue a new password to {email}? The current one stops working and every session ends.",
+      "delete": "Delete",
+      "deleteConfirm": "Delete the account {email}? Its metrics pass to the unit heads. An account that has entered data can only be deactivated.",
+      "passwordOnce": "Password for {email}. Hand it over personally — it will not be shown again:",
+      "copy": "Copy",
+      "copied": "Copied",
+      "done": "Done",
+      "fill": "Enter email and name",
+      "empty": "No users yet",
+      "search": "Search by name or email"
+    },
+    "org": {
+      "subtitle": "Units, heads and members. A head sees the unit and everything below; members and viewers see their unit only.",
+      "createUnit": "Add unit",
+      "create": "Create",
+      "name": "Name",
+      "parent": "Part of",
+      "head": "Head",
+      "noHead": "no head",
+      "members": "Members",
+      "noMembers": "No members",
+      "metrics": "metrics: {n}",
+      "edit": "Configure",
+      "editTitle": "Unit “{name}”",
+      "save": "Save",
+      "moveHint": "Changing “Part of” moves the unit with its whole branch; heads’ access changes at once.",
+      "rootHint": "The root unit cannot be moved.",
+      "selectUser": "Select a person",
+      "selectUnit": "Select a unit",
+      "addMember": "Add",
+      "remove": "Remove",
+      "removeConfirm": "Remove {name} from “{unit}”?",
+      "role": "Role",
+      "headHint": "The previous head loses the branch and stays in the unit as a viewer — change the role or remove them.",
+      "fillUnit": "Enter the name and the parent unit"
+    }
+  },
+  "help": {
+    "subtitle": "How the dashboard works and the weekly routine.",
+    "contents": "Contents"
+  }
+}

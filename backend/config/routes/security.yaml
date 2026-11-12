@@ -1,0 +1,14 @@
+_security_logout:
+    resource: security.route_loader.logout
+    type: service
+
+# Handled entirely by the json_login authenticator of the api_login firewall;
+# the route only has to exist so the router does not answer 404 first.
+api_login:
+    path: /api/login
+    methods: [POST]
+
+# Handled by the logout listener of the api firewall (refresh token invalidation).
+api_logout:
+    path: /api/logout
+    methods: [POST]

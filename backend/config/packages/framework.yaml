@@ -1,0 +1,25 @@
+framework:
+    secret: '%env(APP_SECRET)%'
+    session: false
+    http_method_override: false
+
+    rate_limiter:
+        # PUT /api/me/password checks the current password: like /api/login, no unlimited guessing.
+        password_change:
+            policy: fixed_window
+            limit: 5
+            interval: '15 minutes'
+        # Requests to the language model per user (cost control); a chat answer counts once.
+        ai_requests:
+            policy: sliding_window
+            limit: 40
+            interval: '1 hour'
+
+when@test:
+    framework:
+        test: true
+        cache:
+            pools:
+                # Limiter counters must not survive between runs: user ids repeat after the test DB rebuild.
+                cache.rate_limiter:
+                    adapter: cache.adapter.array

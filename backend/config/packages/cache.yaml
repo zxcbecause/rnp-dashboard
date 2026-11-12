@@ -1,0 +1,11 @@
+framework:
+    cache:
+        prefix_seed: acme/rnp-dashboard
+
+when@test:
+    framework:
+        cache:
+            # Keeps login throttling state per process, so failed-login tests never lock later runs out.
+            pools:
+                cache.rate_limiter:
+                    adapter: cache.adapter.array

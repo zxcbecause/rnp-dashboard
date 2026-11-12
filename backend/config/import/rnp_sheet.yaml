@@ -1,0 +1,251 @@
+# Rows of the legacy "Метрики РНП" sheet → dashboard metrics (app:import:rnp-sheet).
+# Row names are compared normalized (case, spaces, Latin look-alikes, trailing "- 5000" / "- 46%").
+# Decision 05.11.2026: only metrics that exist in the dashboard; automatic metrics take plans only
+# (facts come from the platform / Bitrix), manual ones take plans and weekly facts.
+# Not mapped on purpose: calls (the sheet holds a daily average, the dashboard a weekly count).
+# HR percentages (probation, 1-1, turnover, eNPS): the sheet keeps current values in the plan column — not imported.
+
+# Rows with only column B filled that open a department section.
+sections: [Marketing, Revenue, Finance, CS, Sales, Operations, HR, IT]
+
+metrics:
+  # Marketing
+  mkt_ad_spend:
+    section: Marketing
+    rows: ['Расход на рекламу', 'Расход на рекламу (100-110 евро)']
+  mkt_leads:
+    section: Marketing
+    rows: ['Лиды']
+  mkt_qualified_leads:
+    section: Marketing
+    rows: ['Квал-лиды', 'Квал лиды', 'Квал лиды - 2']
+  mkt_cpl:
+    section: Marketing
+    rows: ['CPL']
+  # Monthly cohorts (plans only: facts come from Bitrix / formulas).
+  mkt_new_objects:
+    section: Marketing
+    rows: ['Новые объекты']
+  mkt_cv_lead_contract:
+    section: Marketing
+    rows: ['CV: лид - договор']
+  mkt_cac:
+    section: Marketing
+    rows: ['CAC', 'CAC объекта']
+  mkt_direct_site_sum:
+    section: Marketing
+    rows: ['Прямые бронирования с сайта: сумма', 'Прямые бронирования с сайта: сумма (по дате создания)']
+
+  # Revenue
+  rev_stayed_sum:
+    section: Revenue
+    rows: ['Сумма бронирований (прожили)', 'Сумма бронирований (прожили) - 5000', 'Сумма бронирований (прожили) - 2000 (после 16 ноября - 1500)']
+  rev_bookings_sum:
+    section: Revenue
+    # September called it "План-факт продаж" (same daily sums as the later "общая").
+    rows: ['Сумма бронирований (общая)', 'План-факт продаж']
+  rev_arrivals_count:
+    section: Revenue
+    rows: ['Количество заездов (check in)', 'Кол-во заездов (check in)']
+  rev_avg_booking:
+    section: Revenue
+    rows: ['Cредняя сумма брони (check in)']
+  rev_adr:
+    section: Revenue
+    rows: ['ADR апартаменты (check in)']
+  rev_cancelled_count:
+    section: Revenue
+    rows: ['Кол-во отменненых бронирований']
+  # rev_occupancy is the guest occupancy. «Загрузка (%, факт)» of September/October and «Загрузка общая» of November
+  # also count owner stays (Marta, 11.11.2026) and belong to rev_occupancy_total (plan only: the facts are computed).
+  rev_occupancy_total:
+    section: Revenue
+    rows: ['Загрузка общая (%, факт)', 'Загрузка (%, факт)']
+  # The forecast itself is computed (point-in-time), the sheet gives only its plan.
+  rev_occupancy_next5:
+    section: Revenue
+    rows: ['Загрузка на следующие 5 дней']
+  rev_occupancy:
+    section: Revenue
+    rows: ['Загрузка по гостевым бронированиям', 'Загрузка по гостевым бронированиям - 20% (после 16 ноября - 15%)']
+  rev_adr_villa:
+    section: Revenue
+    rows: ['ADR виллы и дома (check in)']
+  rev_long_count:
+    section: Revenue
+    rows: ['Долгосрочные брони']
+  rev_long_sum:
+    section: Revenue
+    rows: ['Сумма долгосрочных бронирований']
+  rev_cancelled_sum:
+    section: Revenue
+    rows: ['Сумма отмененных бронирований']
+
+  # CS
+  cs_incoming_sum:
+    section: CS
+    rows: ['Сумма всех входящих бронирований']
+  cs_incoming_count:
+    section: CS
+    rows: ['Количество входящих бронирований']
+  cs_manual_sum:
+    section: CS
+    rows: ['Сумма manual']
+  cs_manual_count:
+    section: CS
+    rows: ['Количество manual']
+  cs_manual_robo_sum:
+    section: CS
+    rows: ['Сумма manual robo']
+  cs_manual_robo_count:
+    section: CS
+    rows: ['Количество manual robo']
+  cs_manual_prolongation_sum:
+    section: CS
+    rows: ['Сумма manual prolongacion', 'Сумма manual prolongación']
+  cs_manual_prolongation_count:
+    section: CS
+    rows: ['Количество manual prolongacion', 'Количество manual prolongación']
+  cs_direct_base_sum:
+    section: CS
+    rows: ['Прямые бронирования по базе: сумма (created) 571/д', 'Прямые бронирования по базе: сумма (created)', 'Перехваченные бронирования: сумма (created) 30% от вх.бр.']
+  cs_direct_base_share:
+    section: CS
+    rows: ['Прямые бронирования по базе: процент (created)', 'Прямые бронирования по базе: процент (created) 30%', 'Перехваченные бронирования: процент (created) 30%']
+  cs_response_minutes:
+    section: CS
+    rows: ['Среднее время ответов на сообщения', 'Среднее время ответов на сообщения (мин) 15']
+  cs_missed_calls_share:
+    section: CS
+    rows: ['Количество пропущенных звонков %', 'Количество пропущенных звонков % (15%)']
+
+  # Sales (catalog config/metrics/departments-2026-11.yaml)
+  sales_calls:
+    section: Sales
+    rows: ['Количество звонков', 'Количество звонков 80']
+  sales_conversations:
+    section: Sales
+    rows: ['Количество разговоров от 40 с.', 'Количество разговоров от 40 с. 5']
+  sales_meetings:
+    section: Sales
+    rows: ['Количество встреч']
+  sales_proposals_sent:
+    section: Sales
+    rows: ['Количество отправленных КП']
+  sales_proposals_agreed:
+    section: Sales
+    rows: ['Количество согласованных КП']
+  sales_proposals_sum:
+    section: Sales
+    rows: ['Сумма отправленных КП']
+  sales_contracts_count:
+    section: Sales
+    rows: ['Количество подписанных контрактов']
+  sales_contracts_sum:
+    section: Sales
+    rows: ['Сумма подписанных контрактов']
+  sales_new_objects:
+    section: Sales
+    rows: ['Новые объекты']
+  sales_objects_in_work:
+    section: Sales
+    rows: ['Объекты в работе']
+  sales_lost_objects:
+    section: Sales
+    rows: ['Ушедшие объекты']
+
+  # Operations (catalog config/metrics/departments-2026-11.yaml)
+  ops_cleaning_sum:
+    section: Operations
+    rows: ['Сумма за сделанные уборки']
+  ops_cleaning_commission_sasha:
+    section: Operations
+    rows: ['Комиссия с уборки (только Саша)']
+  ops_cleaning_commission_acme:
+    section: Operations
+    rows: ['Комиссия с уборки (только Acme)']
+  ops_cleanings_planned:
+    section: Operations
+    rows: ['Количество запланированных уборок']
+  ops_cleanings_done:
+    section: Operations
+    rows: ['Количество сделанных уборок']
+  ops_extra_works_planned:
+    section: Operations
+    rows: ['Количество запланированных доп работ']
+  ops_extra_works_pending:
+    section: Operations
+    rows: ['Количество висящих доп работ']
+  ops_extra_works_sum:
+    section: Operations
+    rows: ['Сумма всего доп работ']
+  ops_extra_works_income:
+    section: Operations
+    rows: ['Заработок с доп работ - ремонты и некомиссионные доходы (Саша + Acme)']
+  ops_complaints_cleaning_share:
+    section: Operations
+    rows: ['Количество жалоб (уборка) %']
+  ops_complaints_tech_share:
+    section: Operations
+    rows: ['Количество жалоб (тех.неполадки) %']
+
+  # HR (catalog config/metrics/departments-2026-11.yaml)
+  hr_onboarded:
+    section: HR
+    rows: ['Прошедщие онбординг', 'Прошедшие онбординг']
+  hr_cv_viewed:
+    section: HR
+    rows: ['Просмотрено резюме']
+  hr_contacts:
+    section: HR
+    rows: ['Контактов']
+  hr_interviews:
+    section: HR
+    rows: ['Собеседований']
+  hr_final_interviews:
+    section: HR
+    rows: ['Финальных собеседований']
+  hr_test_tasks:
+    section: HR
+    rows: ['Тестовых заданий']
+  hr_offers_accepted:
+    section: HR
+    rows: ['Офферов (принятых)']
+  hr_hires:
+    section: HR
+    rows: ['Выход сотрудника']
+  hr_project_onboarding_cs:
+    section: HR
+    rows: ['Проект ONboarding CS']
+  cs_lost_calls_share:
+    section: CS
+    rows: ['Количество потерянных звонков % (без follow-up за 24ч)', 'Количество потерянных звонков % (без follow-up за 24ч) 0%']
+  cs_direct_commission:
+    section: CS
+    rows: ['Комиссия со всех перехваченных бронирований (created) 10%', 'Комиссия со всех перехваченных бронирований (created)']
+
+  # IT (Takhmina, 10.11.2026)
+  tech_timeline:
+    section: IT
+    rows: ['Таймлайн (ЦКП - сданные в срок проекты все)']
+  tech_tourist_cabinet:
+    section: IT
+    rows: ['Платформа. Кабинет Туриста']
+  tech_metrics_dashboard:
+    section: IT
+    rows: ['Дашборд Метрик']
+  tech_aihub_stage2:
+    section: IT
+    rows: ['Аихаб. 2 Этап']
+  tech_design_center:
+    section: IT
+    rows: ['Единый дизайн центр (граф. дизайн)']
+  tech_simplesales:
+    section: IT
+    rows: ['СимплСейлс']
+  tech_bugs_own:
+    section: IT
+    rows: ['Количество багов Наших продуктов']
+  tech_bugs_external:
+    section: IT
+    rows: ['Количество багов Не наших продуктов']

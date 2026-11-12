@@ -1,0 +1,129 @@
+name: rnp-dashboard
+
+services:
+  php:
+    container_name: rnp-php
+    build:
+      context: ./docker/php
+    volumes:
+      - ./backend:/var/www/backend
+      # vendor/ and the Symfony cache live on Linux volumes: on the Windows bind mount (9p) every file
+      # stat costs ~1 ms and a request touches ~570 PHP files. Only our own code stays on the bind mount.
+      - rnp-backend-vendor:/var/www/backend/vendor
+      - rnp-backend-cache:/var/www/backend/var/cache
+      - ./docker/php/conf.d/app.ini:/usr/local/etc/php/conf.d/zz-app.ini:ro
+    environment:
+      COMPOSER_MEMORY_LIMIT: -1
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks: [rnp-net]
+
+  nginx:
+    container_name: rnp-nginx
+    image: nginx:1.27-alpine
+    ports:
+      - "8081:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./backend/public:/var/www/backend/public:ro
+    depends_on: [php]
+    networks: [rnp-net]
+
+  mariadb:
+    container_name: rnp-mariadb
+    image: mariadb:11.4
+    ports:
+      - "3308:3306"
+    environment:
+      # Local development credentials only; never reused anywhere else.
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: rnp
+      MARIADB_USER: rnp
+      MARIADB_PASSWORD: rnp
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - rnp-db-data:/var/lib/mysql
+      - ./docker/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [rnp-net]
+
+  scheduler:
+    container_name: rnp-scheduler
+    image: mcuadros/ofelia:latest
+    command: daemon --config=/etc/ofelia/config.ini
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/ofelia/config.ini:/etc/ofelia/config.ini:ro
+    depends_on: [php]
+    networks: [rnp-net]
+
+  frontend:
+    container_name: rnp-frontend
+    image: node:24-alpine
+    working_dir: /app
+    # Installs dependencies on start (no-op when node_modules is up to date), then runs the dev server.
+    command: sh -c "unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY && npm install --no-audit --no-fund && npm run dev"
+    ports:
+      - "3001:3000"
+    environment:
+      NUXT_API_BASE: http://rnp-nginx/api
+      WATCH_POLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - rnp-frontend-node-modules:/app/node_modules
+    depends_on: [nginx]
+    networks: [rnp-net]
+
+  # Production build of the frontend for showing the app to others (fast, no dev tooling, no sources).
+  # Not started by default: `docker compose --profile preview up -d --build frontend-preview` → http://localhost:3002
+  # (rebuilds the frontend on every start). .nuxt stays in a volume; .output must be a plain directory
+  # (Nitro deletes it before a build, which fails on a mount point) and lands in frontend/.output (gitignored).
+  frontend-preview:
+    container_name: rnp-frontend-preview
+    image: node:24-alpine
+    profiles: ["preview"]
+    working_dir: /app
+    command: sh -c "unset http_proxy HTTP_PROXY https_proxy HTTPS_PROXY && npm run build && node .output/server/index.mjs"
+    ports:
+      - "3002:3000"
+    environment:
+      NUXT_API_BASE: http://rnp-nginx/api
+      NITRO_PORT: "3000"
+    volumes:
+      - ./frontend:/app
+      - rnp-frontend-node-modules:/app/node_modules
+      - rnp-frontend-preview-nuxt:/app/.nuxt
+    depends_on: [nginx]
+    networks: [rnp-net]
+
+  # Temporary public link to the preview build (Cloudflare quick tunnel, no account): only the frontend is
+  # exposed; the API is reached through its proxy. `docker compose --profile share up -d tunnel`, the
+  # https://….trycloudflare.com address is in `docker compose logs tunnel`; stop with `docker compose stop tunnel`.
+  tunnel:
+    container_name: rnp-tunnel
+    image: cloudflare/cloudflared:latest
+    profiles: ["share"]
+    command: tunnel --no-autoupdate --url http://rnp-frontend-preview:3000
+    depends_on: [frontend-preview]
+    networks: [rnp-net]
+
+networks:
+  rnp-net:
+    name: rnp-net
+
+volumes:
+  rnp-db-data:
+    name: rnp-db-data
+  rnp-frontend-node-modules:
+    name: rnp-frontend-node-modules
+  rnp-backend-vendor:
+    name: rnp-backend-vendor
+  rnp-backend-cache:
+    name: rnp-backend-cache
+  rnp-frontend-preview-nuxt:
+    name: rnp-frontend-preview-nuxt

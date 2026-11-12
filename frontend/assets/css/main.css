@@ -1,0 +1,258 @@
+@import "tailwindcss";
+
+/*
+ * Acme RNP design tokens. The brand yellow is the platform's; the warm neutrals and the dark sidebar
+ * follow the "Project Management Dashboard" reference. Every colour exists twice: as a --rnp-* CSS variable
+ * (for hand-written CSS, SVG, chart.js) and as a Tailwind token (bg-rnp-card, text-rnp-muted...).
+ * On yellow only dark text (#1a1a1a) is allowed: white fails contrast.
+ */
+:root {
+  --rnp-sidebar: #141414;
+  --rnp-sidebar-text: #d6d3cc;
+  --rnp-accent: #eec52b;
+  --rnp-accent-hover: #d4a824;
+  --rnp-accent-soft: #fdf6dc;
+  --rnp-bg: #f6f2e9;
+  --rnp-card: #fbf9f4;
+  --rnp-card-hover: #fdfcf8;
+  --rnp-pill: #ffffff;
+  --rnp-text: #1a1a1a;
+  --rnp-text-muted: #8a857c;
+  --rnp-divider: #ebe5d9;
+
+  /* Status colours carry meaning (plan met / at risk / not met): never decoration. */
+  --rnp-green: #16a34a;
+  --rnp-green-soft: #dcf5e3;
+  --rnp-yellow: #c99a06;
+  --rnp-yellow-soft: #fdf3c9;
+  --rnp-red: #dc2626;
+  --rnp-red-soft: #fde2e2;
+
+  /* KPI icon circles. */
+  --rnp-kpi-yellow: #eec52b;
+  --rnp-kpi-orange: #f2994a;
+  --rnp-kpi-blue: #5b8def;
+  --rnp-kpi-lilac: #b38bea;
+
+  --rnp-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --rnp-radius-card: 20px;
+}
+
+/* Tailwind v4 CSS-first theme tokens (no tailwind.config.*). */
+@theme static {
+  --color-primary-50: #fefdf5;
+  --color-primary-100: #fdf9e8;
+  --color-primary-200: #fbf3d1;
+  --color-primary-300: #f8eab0;
+  --color-primary-400: #f5e08e;
+  --color-primary-500: #eec52b;
+  --color-primary-600: #d4a824;
+  --color-primary-700: #a8841c;
+  --color-primary-800: #7d6215;
+  --color-primary-900: #52400e;
+
+  --color-rnp-sidebar: #141414;
+  --color-rnp-sidebar-text: #d6d3cc;
+  --color-rnp-accent: #eec52b;
+  --color-rnp-accent-hover: #d4a824;
+  --color-rnp-accent-soft: #fdf6dc;
+  --color-rnp-bg: #f6f2e9;
+  --color-rnp-card: #fbf9f4;
+  --color-rnp-pill: #ffffff;
+  --color-rnp-text: #1a1a1a;
+  --color-rnp-muted: #8a857c;
+  --color-rnp-divider: #ebe5d9;
+
+  /* RNP status colours: plan met / at risk / not met. */
+  --color-rnp-green: #16a34a;
+  --color-rnp-green-soft: #dcf5e3;
+  --color-rnp-yellow: #c99a06;
+  --color-rnp-yellow-soft: #fdf3c9;
+  --color-rnp-red: #dc2626;
+  --color-rnp-red-soft: #fde2e2;
+  --color-rnp-neutral: #8a857c;
+
+  --radius-card: 20px;
+
+  --font-sans: 'Manrope', system-ui, sans-serif;
+}
+
+html,
+body {
+  font-family: var(--font-sans);
+  color: var(--rnp-text);
+  background: var(--rnp-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numbers line up in tables and KPI cards. */
+.tabular-nums,
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Motion ---------- */
+
+/* Page transition: only the content area (the transition lives inside the layout's <main>). */
+.page-enter-active {
+  transition: opacity 280ms var(--rnp-ease-out), transform 280ms var(--rnp-ease-out);
+}
+.page-leave-active {
+  transition: opacity 150ms ease-in, transform 150ms ease-in;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(12px) scale(0.99);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+/*
+ * Staggered "rise" of blocks on page entry: set style="--i: n" (n < 12) on each element.
+ * Elements beyond the first dozen pass --i: 0 and appear at once.
+ */
+@keyframes rnp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rnp-rise {
+  animation: rnp-rise 420ms var(--rnp-ease-out) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+/* Reloads (another week, another filter): a short crossfade, no cascade. */
+.rnp-fade-enter-active,
+.rnp-fade-leave-active {
+  transition: opacity 150ms ease;
+}
+.rnp-fade-enter-from,
+.rnp-fade-leave-to {
+  opacity: 0;
+}
+
+/* Skeleton shimmer in palette tones. */
+@keyframes rnp-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+.rnp-skeleton {
+  background: linear-gradient(90deg, #efe9dd 25%, #f8f4ec 37%, #efe9dd 63%);
+  background-size: 400% 100%;
+  animation: rnp-shimmer 1.4s ease infinite;
+}
+
+/* Card hover: a slight lift and a lighter tone. */
+.rnp-card-hover {
+  transition: transform 200ms var(--rnp-ease-out), background-color 200ms ease;
+}
+.rnp-card-hover:hover {
+  transform: translateY(-2px);
+  background-color: var(--rnp-card-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* ---------- PrimeVue as pills ---------- */
+
+/* Select shown as a white filter pill (org unit picker and similar). */
+.rnp-pill-select.p-select {
+  height: 2.25rem;
+  align-items: center;
+  border-color: transparent;
+  border-radius: 999px;
+  background: var(--rnp-pill);
+  box-shadow: none;
+}
+.rnp-pill-select.p-select:not(.p-disabled):hover {
+  border-color: transparent;
+  background: var(--rnp-accent-soft);
+}
+.rnp-pill-select .p-select-label {
+  padding: 0 0.25rem 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--rnp-text);
+}
+.rnp-pill-select .p-select-dropdown {
+  width: 2.25rem;
+  color: var(--rnp-text-muted);
+}
+
+/* Native date input inside a pill: no own frame, palette text. */
+.rnp-date-input {
+  background: transparent;
+  border: 0;
+  color: var(--rnp-text);
+  font: inherit;
+  font-size: 0.8125rem;
+  outline: none;
+}
+.rnp-date-input:focus-visible {
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px var(--rnp-accent);
+}
+
+/* Markdown of AI answers (renderMarkdown output): weekly review, alert explanations. */
+.ai-markdown ul,
+.ai-markdown ol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-left: 1.25rem;
+  margin: 0 0 0.75rem;
+}
+
+.ai-markdown ul {
+  list-style: disc;
+}
+
+.ai-markdown ol {
+  list-style: decimal;
+}
+
+.ai-markdown li::marker {
+  color: var(--rnp-accent-hover);
+}
+
+.ai-markdown p {
+  margin: 0 0 0.6rem;
+}
+
+.ai-markdown p:last-child,
+.ai-markdown ul:last-child,
+.ai-markdown ol:last-child {
+  margin-bottom: 0;
+}
+
+.ai-markdown strong {
+  font-weight: 700;
+}
+
+.ai-markdown code {
+  border-radius: 6px;
+  background: var(--rnp-bg);
+  padding: 0 0.3rem;
+  font-size: 0.8125rem;
+}

@@ -1,0 +1,228 @@
+# Revenue ratios on check-in (decision 10.11.2026), as Marta's «(check in)» rows in «Метрики РНП»: numerator and
+# denominator are the same bookings — those arriving in the period. Before, the average booking and ADR divided the
+# rent of bookings CREATED in the period by arrivals / nights STAYED, two different sets of bookings.
+# Loaded with `php bin/console app:metric:catalog config/metrics/revenue-2026-11.yaml` (idempotent, by code).
+# Apartments = platform accommodation types APARTMENT and STUDIO (villas and houses: VILLA, HOUSE, TOWNHOUSE, COTTAGE).
+
+units:
+  Revenue:
+    sort_from: 200
+    metrics:
+      - code: rev_checkin_sum
+        name: Сумма броней с заездом в периоде
+        unit: eur
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: arrival_date, amount_field: rental_price}
+        card: ['Стоимость аренды броней с заездом в периоде', 'SUM(booking.rentalPrice) по arrivalDate', 'API платформы: GET /api/bookings', 'Неделя, месяц', 'Числитель средней суммы брони']
+      - code: rev_apt_checkin_sum
+        name: 'Апартаменты: сумма броней с заездом'
+        unit: eur
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: arrival_date, amount_field: rental_price, accommodation_types: [APARTMENT, STUDIO]}
+        card: ['Стоимость аренды броней апартаментов и студий с заездом в периоде', 'SUM(booking.rentalPrice) по arrivalDate, тип объекта APARTMENT / STUDIO', 'API платформы: GET /api/bookings, /api/accommodations', 'Неделя, месяц', 'Числитель ADR апартаментов']
+      - code: rev_apt_checkin_nights
+        name: 'Апартаменты: ночи броней с заездом'
+        source: platform_api
+        source_config: {calculator: booking_nights, date_field: arrival_date, accommodation_types: [APARTMENT, STUDIO]}
+        card: ['Все ночи броней апартаментов и студий с заездом в периоде', 'SUM(departure − arrival) по arrivalDate, тип объекта APARTMENT / STUDIO', 'API платформы: GET /api/bookings, /api/accommodations', 'Неделя, месяц', 'Знаменатель ADR апартаментов']
+      - code: rev_avg_booking
+        name: Средняя сумма брони
+        unit: eur
+        source: platform_api
+        time_agg: formula
+        formula: rev_checkin_sum / rev_arrivals_count
+        card: ['Средняя стоимость аренды одной брони с заездом в периоде (check in)', 'Сумма броней с заездом / Количество заездов', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне, не усредняется']
+      - code: rev_adr
+        name: ADR апартаменты
+        unit: eur
+        source: platform_api
+        time_agg: formula
+        formula: rev_apt_checkin_sum / rev_apt_checkin_nights
+        card: ['Средняя цена ночи в апартаментах и студиях по броням с заездом в периоде (check in)', 'Сумма броней апартаментов с заездом / их ночи', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне']
+
+      # Rest of Marta's «Метрики РНП» rows (10.11.2026), definitions checked against the «Ноябрь» sheet, 01–09.11:
+      # «на будущие даты» = every booking created in the period, split by arrival month; «долгосрочные» = stays of
+      # 14+ nights by creation date; cancellations by the day they were cancelled (raw_platform_booking.cancelled_at).
+      - code: rev_bookings_count
+        name: Количество бронирований (созданных)
+        source: platform_api
+        source_config: {calculator: bookings_count, date_field: creation_date}
+        card: ['Число бронирований, созданных в периоде (в листе — «бронирования на будущие даты»)', 'COUNT(booking) по creationDate', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: rev_created_this_month_count
+        name: 'Созданные брони: заезд в этом месяце'
+        source: platform_api
+        source_config: {calculator: bookings_count, date_field: creation_date, arrival_month_offset: 0}
+        card: ['Брони, созданные в периоде, с заездом в том же месяце', 'COUNT(booking) по creationDate, месяц arrivalDate = месяц периода', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: rev_created_this_month_sum
+        name: 'Созданные брони: сумма с заездом в этом месяце'
+        unit: eur
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: creation_date, amount_field: rental_price, arrival_month_offset: 0}
+        card: ['Стоимость аренды броней, созданных в периоде, с заездом в том же месяце', 'SUM(booking.rentalPrice) по creationDate, месяц arrivalDate = месяц периода', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: rev_created_next_month_count
+        name: 'Созданные брони: заезд в следующем месяце'
+        source: platform_api
+        source_config: {calculator: bookings_count, date_field: creation_date, arrival_month_offset: 1}
+        card: ['Брони, созданные в периоде, с заездом в следующем месяце', 'COUNT(booking) по creationDate, месяц arrivalDate = месяц периода + 1', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: rev_created_next_month_sum
+        name: 'Созданные брони: сумма с заездом в следующем месяце'
+        unit: eur
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: creation_date, amount_field: rental_price, arrival_month_offset: 1}
+        card: ['Стоимость аренды броней, созданных в периоде, с заездом в следующем месяце', 'SUM(booking.rentalPrice) по creationDate, месяц arrivalDate = месяц периода + 1', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: rev_long_count
+        name: Долгосрочные брони
+        source: platform_api
+        source_config: {calculator: bookings_count, date_field: creation_date, min_nights: 14}
+        card: ['Брони от 14 ночей, созданные в периоде', 'COUNT(booking) по creationDate, departure − arrival ≥ 14', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: rev_long_sum
+        name: Сумма долгосрочных бронирований
+        unit: eur
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: creation_date, amount_field: rental_price, min_nights: 14}
+        card: ['Стоимость аренды броней от 14 ночей, созданных в периоде', 'SUM(booking.rentalPrice) по creationDate, departure − arrival ≥ 14', 'API платформы: GET /api/bookings', 'Неделя, месяц']
+      - code: rev_cancelled_sum
+        name: Сумма отменённых бронирований
+        unit: eur
+        direction: lower_better
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: cancelled_at, amount_field: rental_price, statuses: [CANCELLED]}
+        card: ['Стоимость аренды броней, отменённых в периоде', 'SUM(booking.rentalPrice) по дате отмены', 'API платформы: GET /api/bookings (дату отмены фиксирует синк дашборда, до 10.11.2026 — lastModification)', 'Неделя, месяц']
+      - code: rev_villa_checkin_sum
+        name: 'Виллы и дома: сумма броней с заездом'
+        unit: eur
+        source: platform_api
+        source_config: {calculator: bookings_sum, date_field: arrival_date, amount_field: rental_price, accommodation_types: [VILLA, HOUSE, TOWNHOUSE, COTTAGE]}
+        card: ['Стоимость аренды броней вилл и домов с заездом в периоде', 'SUM(booking.rentalPrice) по arrivalDate, тип объекта VILLA / HOUSE / TOWNHOUSE / COTTAGE', 'API платформы: GET /api/bookings, /api/accommodations', 'Неделя, месяц', 'Числитель ADR вилл и домов']
+      - code: rev_villa_checkin_nights
+        name: 'Виллы и дома: ночи броней с заездом'
+        source: platform_api
+        source_config: {calculator: booking_nights, date_field: arrival_date, accommodation_types: [VILLA, HOUSE, TOWNHOUSE, COTTAGE]}
+        card: ['Все ночи броней вилл и домов с заездом в периоде', 'SUM(departure − arrival) по arrivalDate, тип объекта VILLA / HOUSE / TOWNHOUSE / COTTAGE', 'API платформы: GET /api/bookings, /api/accommodations', 'Неделя, месяц', 'Знаменатель ADR вилл и домов']
+      - code: rev_adr_villa
+        name: ADR виллы и дома
+        unit: eur
+        source: platform_api
+        time_agg: formula
+        formula: rev_villa_checkin_sum / rev_villa_checkin_nights
+        card: ['Средняя цена ночи в виллах и домах по броням с заездом в периоде (check in)', 'Сумма броней вилл и домов с заездом / их ночи', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне']
+      # Existing metrics redefined on 10.11.2026.
+      - code: rev_cancelled_count
+        name: Отменённые бронирования
+        direction: lower_better
+        source: platform_api
+        source_config: {calculator: bookings_count, date_field: cancelled_at, statuses: [CANCELLED]}
+        card: ['Бронирования, отменённые в периоде', 'COUNT(booking) со status = CANCELLED по дате отмены', 'API платформы: GET /api/bookings (дату отмены фиксирует синк дашборда, до 10.11.2026 — lastModification)', 'Неделя, месяц']
+      - code: rev_occupancy
+        name: Загрузка по гостевым бронированиям
+        unit: percent
+        source: platform_api
+        time_agg: formula
+        formula: rev_nights_sold / rev_nights_available
+        card: ['Доля ночей гостевых броней (без собственников и блокировок) от доступных к продаже', 'Проданные ночи / Доступные ночи', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне']
+
+      # Marta, 11.11.2026 (internal notes): «Загрузка общая» = nights of guests and
+      # owners / capacity; free nights = capacity − occupied − blocked. Owner stays (status OWNER) and calendar blocks
+      # (UNAVAILABLE) count only inside the sales window of the listing — the capacity of rev_nights_available.
+      # Checked against her report of 10.11: guests 41 (41), owners 26 (25), blocked 27 (25), capacity 224 (222).
+      - code: rev_owner_nights
+        name: Ночи собственников
+        source: platform_api
+        source_config: {calculator: booked_nights, statuses: [OWNER], sellable_only: true}
+        card: ['Ночи проживания собственников в объектах, которые находятся в продаже', 'Ночи броней со status = OWNER внутри периода продаж объекта', 'API платформы: GET /api/bookings, /api/accommodations', 'Неделя, месяц', 'Числитель общей загрузки']
+      - code: rev_blocked_nights
+        name: Заблокированные ночи
+        direction: lower_better
+        source: platform_api
+        source_config: {calculator: booked_nights, statuses: [UNAVAILABLE], sellable_only: true}
+        card: ['Ночи, закрытые блокировками календаря в объектах, которые находятся в продаже', 'Ночи броней со status = UNAVAILABLE внутри периода продаж объекта', 'API платформы: GET /api/bookings, /api/accommodations', 'Неделя, месяц', 'Вычитается из свободных ночей']
+      - code: rev_occupancy_total
+        name: Загрузка общая (с собственниками)
+        unit: percent
+        source: platform_api
+        time_agg: formula
+        formula: (rev_nights_sold + rev_owner_nights) / rev_nights_available
+        card: ['Доля ночей, занятых гостями и собственниками, от ёмкости портфеля в продаже («Загрузка общая» в листе)', '(Проданные ночи + Ночи собственников) / Доступные ночи', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне']
+      - code: rev_free_nights_share
+        name: Свободные ночи — %
+        unit: percent
+        direction: lower_better
+        source: platform_api
+        time_agg: formula
+        formula: (rev_nights_available - rev_nights_sold - rev_owner_nights - rev_blocked_nights) / rev_nights_available
+        card: ['Доля ночей, не занятых гостями и собственниками и не закрытых блокировками', '(Доступные − Проданные − Ночи собственников − Заблокированные) / Доступные ночи', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне']
+
+      # Marta's second batch, 11.11.2026. «Загрузка на следующие 5 дней»: a forecast as of the last day of the week
+      # (today in the running week) for the five days after it, guests and owners over the capacity of those
+      # days. Point-in-time: only the running week is computed, finished weeks keep their last forecast, and
+      # weeks before 11.11.2026 have none. Her report of 10.11 for 11–15.11: 319 of 1 110 nights = 28.7 %.
+      - code: rev_next5_taken_nights
+        name: 'Следующие 5 дней: занятые ночи'
+        time_agg: last
+        source: platform_api
+        source_config: {calculator: booked_nights, statuses: [CONFIRMED, UNPAID, INVOICED, PAID, IN_PROGRESS, OWNER], sellable_only: true, forward_days: 5}
+        card: ['Ночи гостей и собственников в следующие 5 дней после последнего дня периода (на идущей неделе — после сегодняшнего)', 'Ночи броней гостей и собственников в окне 5 дней, только объекты в продаже', 'API платформы: GET /api/bookings, /api/accommodations', 'Значение на дату; прошедшие недели хранят последний прогноз', 'Числитель загрузки на следующие 5 дней']
+      - code: rev_next5_capacity_nights
+        name: 'Следующие 5 дней: ёмкость'
+        time_agg: last
+        source: platform_api
+        source_config: {calculator: available_nights, forward_days: 5}
+        card: ['Ночи объектов в продаже в следующие 5 дней после последнего дня периода', 'Σ объектов в продаже × 5 дней', 'API платформы: GET /api/accommodations', 'Значение на дату; прошедшие недели хранят последний прогноз', 'Знаменатель загрузки на следующие 5 дней']
+      - code: rev_occupancy_next5
+        name: Загрузка на следующие 5 дней
+        unit: percent
+        source: platform_api
+        time_agg: formula
+        formula: rev_next5_taken_nights / rev_next5_capacity_nights
+        card: ['Прогноз: доля ночей, уже занятых гостями и собственниками, в следующие 5 дней', 'Занятые ночи следующих 5 дней / Ёмкость следующих 5 дней', 'Расчёт из базовых метрик', 'Значение на дату: неделя и месяц показывают последний прогноз']
+
+      # Traffic light of listings: every listing on sale by its own occupancy (guests and owners) in the period.
+      # Marta's sheet shows it per day (a listing is taken or not); here the period is the week, so a listing with
+      # a single night in the week is yellow, not red. The month is the average of its weeks.
+      - code: rev_objects_total
+        name: 'Светофор: объекты в продаже'
+        time_agg: avg
+        source: platform_api
+        source_config: {calculator: objects_by_occupancy, band: all}
+        card: ['Объекты, которые были в продаже в периоде', 'COUNT(объектов с ночами в продаже в периоде)', 'API платформы: GET /api/accommodations, /api/bookings', 'Неделя; месяц = среднее недель', 'Знаменатель светофора']
+      - code: rev_objects_green
+        name: 'Светофор: объекты с загрузкой от 60 %'
+        time_agg: avg
+        source: platform_api
+        source_config: {calculator: objects_by_occupancy, band: green, threshold_pct: 60, statuses: [CONFIRMED, UNPAID, INVOICED, PAID, IN_PROGRESS, OWNER]}
+        card: ['Объекты, у которых гостями и собственниками занято 60 % ночей периода или больше', 'COUNT(объектов: занятые ночи / ночи в продаже ≥ 60 %)', 'API платформы: GET /api/accommodations, /api/bookings', 'Неделя; месяц = среднее недель']
+      - code: rev_objects_yellow
+        name: 'Светофор: объекты с загрузкой до 60 %'
+        time_agg: avg
+        source: platform_api
+        source_config: {calculator: objects_by_occupancy, band: yellow, threshold_pct: 60, statuses: [CONFIRMED, UNPAID, INVOICED, PAID, IN_PROGRESS, OWNER]}
+        card: ['Объекты, у которых в периоде занята хотя бы одна ночь, но меньше 60 %', 'COUNT(объектов: 0 < занятые ночи / ночи в продаже < 60 %)', 'API платформы: GET /api/accommodations, /api/bookings', 'Неделя; месяц = среднее недель']
+      - code: rev_objects_red
+        name: 'Светофор: объекты без броней'
+        direction: lower_better
+        time_agg: avg
+        source: platform_api
+        source_config: {calculator: objects_by_occupancy, band: red, statuses: [CONFIRMED, UNPAID, INVOICED, PAID, IN_PROGRESS, OWNER]}
+        card: ['Объекты в продаже, у которых в периоде не занята ни одна ночь', 'COUNT(объектов без ночей гостей и собственников)', 'API платформы: GET /api/accommodations, /api/bookings', 'Неделя; месяц = среднее недель']
+      - code: rev_objects_green_share
+        name: 'Светофор 🟢: доля объектов с загрузкой от 60 %'
+        unit: percent
+        source: platform_api
+        time_agg: formula
+        formula: rev_objects_green / rev_objects_total
+        card: ['Доля объектов в продаже с загрузкой 60 % и выше за период', 'Объекты с загрузкой от 60 % / Объекты в продаже', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне']
+      - code: rev_objects_yellow_share
+        name: 'Светофор 🟡: доля объектов с загрузкой до 60 %'
+        unit: percent
+        source: platform_api
+        time_agg: formula
+        formula: rev_objects_yellow / rev_objects_total
+        card: ['Доля объектов в продаже, занятых в периоде меньше чем на 60 %', 'Объекты с загрузкой до 60 % / Объекты в продаже', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне']
+      - code: rev_objects_red_share
+        name: 'Светофор 🔴: доля объектов без броней'
+        unit: percent
+        direction: lower_better
+        source: platform_api
+        time_agg: formula
+        formula: rev_objects_red / rev_objects_total
+        card: ['Доля объектов в продаже без единой занятой ночи за период', 'Объекты без броней / Объекты в продаже', 'Расчёт из базовых метрик', 'Пересчитывается на каждом уровне']

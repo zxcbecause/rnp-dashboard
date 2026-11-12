@@ -1,0 +1,8 @@
+# Root-level ignores; backend/ and frontend/ keep their own .gitignore.
+.idea/
+.vscode/
+*.log
+
+# Production secrets and local database dumps (docker-compose.prod.yml, docs/deploy.md).
+.env.prod
+/backups/

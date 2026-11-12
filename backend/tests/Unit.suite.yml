@@ -1,0 +1,6 @@
+# Unit suite: pure PHP, no kernel and no database.
+
+actor: UnitTester
+modules:
+    enabled:
+        - Asserts

@@ -1,0 +1,9 @@
+{
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts", "**/*.vue", ".nuxt/types/nitro-imports.d.ts", ".nuxt/types/nitro-routes.d.ts"],
+  "exclude": ["node_modules", ".output", "server"]
+}

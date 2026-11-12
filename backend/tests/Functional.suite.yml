@@ -1,0 +1,18 @@
+# Functional suite: requests go through the Symfony kernel against the rnp_test database.
+# The schema is rebuilt from migrations once per run (TestDatabaseExtension);
+# every test runs inside a transaction that is rolled back (Doctrine cleanup).
+
+actor: FunctionalTester
+modules:
+    enabled:
+        - Asserts
+        - Symfony:
+              app_path: 'src'
+              environment: 'test'
+        - Doctrine:
+              depends: Symfony
+              cleanup: true
+        - REST:
+              depends: Symfony
+              part: Json
+        - App\Tests\Support\Helper\Functional
